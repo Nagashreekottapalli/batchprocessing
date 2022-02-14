@@ -1,0 +1,42 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="csv" format="csv">
+      <types:shape format="weave" example="examples/FL_insurance_sample.csv"><![CDATA[%dw 2.0
+
+type csv = Array<{|  policyID: String,   statecode: String,   county: String,   eq_site_limit: String,   hu_site_limit: String,   fl_site_limit: String,   fr_site_limit: String,   tiv_2011: String,   tiv_2012: String,   eq_site_deductible: String,   hu_site_deductible: String,   fl_site_deductible: String,   fr_site_deductible: String,   point_latitude: String,   point_longitude: String,   line: String,   construction: String,   point_granularity: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+    <types:type name="csv1" format="csv">
+      <types:shape format="weave" example="examples/insurance100records.csv"><![CDATA[%dw 2.0
+
+type csv1 = Array<{|  policyID: String,   statecode: String,   county: String,   eq_site_limit: String,   hu_site_limit: String,   fl_site_limit: String,   fr_site_limit: String,   tiv_2011: String,   tiv_2012: String,   eq_site_deductible: String,   hu_site_deductible: String,   fl_site_deductible: String,   fr_site_deductible: String,   point_latitude: String,   point_longitude: String,   line: String,   construction: String,   point_granularity: String|}> {"isQuotedString": "false",
+"header": "true",
+"headerLineNumber": "0"}
+
+]]></types:shape>
+      <types:properties>
+        <types:property name="headerLineNumber" value="0"/>
+        <types:property name="header" value="true"/>
+        <types:property name="isQuotedString" value="false"/>
+      </types:properties>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#19109277-5508-478e-9892-d0fb19ce7542">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="csv1"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

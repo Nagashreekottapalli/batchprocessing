@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:aggregators="http://www.mulesoft.org/schema/mule/aggregators" xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd
+http://www.mulesoft.org/schema/mule/aggregators http://www.mulesoft.org/schema/mule/aggregators/current/mule-aggregators.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e13a47eb-8532-47ca-8c27-08070404cd02" >
+		<http:listener-connection host="0.0.0.0" port="8087" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="9169a424-5646-4350-8d2f-0af40c006cd4" >
+		<file:connection workingDir="C:\Users\nkottapalli\Desktop\muelsofttraniee" />
+	</file:config>
+	<file:config name="File_Config1" doc:name="File Config" doc:id="5a043bde-2bec-4c79-849a-e428f882c806" >
+		<file:connection workingDir="C:\Users\nkottapalli\Desktop\muelsofttraniee" />
+	</file:config>
+	<flow name="batchprocesssplitingFlow" doc:id="902b485d-aa3c-412b-8929-b36eec3ee502" >
+		<http:listener doc:name="Listener/8087/demo" doc:id="fbdd1580-01b7-4b88-a6fd-cf5c60113ac8" config-ref="HTTP_Listener_config" path="/demo" outputMimeType='application/csv; separator=","'>
+			<http:response >
+				<http:body ><![CDATA[#[%dw 2.0
+output application/json
+---
+payload]]]></http:body>
+			</http:response>
+		</http:listener>
+		<file:read doc:name="Read" doc:id="3e1b0911-20d3-4d86-9407-ce1213185cb1" config-ref="File_Config" path="C:\Users\nkottapalli\Desktop\muelsofttraniee\insurance100records.csv"/>
+		<ee:transform doc:name="Transform Message" doc:id="adf40689-4d94-4b95-a0fe-9e7ef5c0748a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="19109277-5508-478e-9892-d0fb19ce7542" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+import * from dw::core::Arrays
+output application/json
+
+---
+payload divideBy 9]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="batchprocesssplitingBatch_Job" doc:id="82a116f8-e13f-4576-be40-6f3211a21118" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="9b6682cd-93bf-4b0a-ad34-83e324700877">
+					<file:write doc:name="Write" doc:id="3753757c-26da-49d7-a39c-6e3691ee21c8" config-ref="File_Config1" path='#[payload[0].policyID as String ++ ".json"]' />
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<logger level="INFO" doc:name="Logger" doc:id="bbd3e886-ddff-4426-814b-ed565acd9974" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
